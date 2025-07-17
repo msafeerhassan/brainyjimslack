@@ -2,6 +2,8 @@
 
 hey everyone! so i made this slack bot called BrainyJim and honestly it turned out pretty cool. basically it just shares random fun facts and has some interactive stuff like trivia games and number guessing.
 
+**UPDATE**: Now uses Socket Mode for easier development and no need for public URLs!
+
 ## what it does
 
 - serves up random facts on demand with `/fact`
@@ -24,25 +26,26 @@ pip install -r requirements.txt
 then you need to create a slack app and get tokens:
 1. go to https://api.slack.com/apps
 2. create new app (from scratch)
-3. go to OAuth & Permissions
-4. add these scopes: app_mentions:read, channels:read, chat:write, commands, users:read
-5. install app to workspace
-6. copy bot token (starts with xoxb-)
-7. go to Basic Information, copy signing secret
-8. add slash commands in your app settings for each command you want to use
+3. **ENABLE SOCKET MODE**: go to Socket Mode in sidebar and enable it
+4. generate App-Level Token with `connections:write` scope (save this as SLACK_APP_TOKEN)
+5. go to OAuth & Permissions
+6. add these bot scopes: app_mentions:read, channels:read, chat:write, commands, users:read
+7. install app to workspace
+8. copy bot token (starts with xoxb-) from OAuth & Permissions
+9. add slash commands in your app settings for each command you want to use
 
-set them as environment variables:
+set environment variables:
 ```bash
 # windows
 set SLACK_BOT_TOKEN=xoxb-your-bot-token-here
-set SLACK_SIGNING_SECRET=your-signing-secret-here
+set SLACK_APP_TOKEN=xapp-your-app-token-here
 
 # linux/mac  
 export SLACK_BOT_TOKEN=xoxb-your-bot-token-here
-export SLACK_SIGNING_SECRET=your-signing-secret-here
+export SLACK_APP_TOKEN=xapp-your-app-token-here
 ```
 
-run it:
+run it locally (no public URL needed!):
 ```bash
 python app.py
 ```
@@ -68,49 +71,57 @@ python app.py
 
 ## notes
 
+- **Socket Mode**: now uses socket mode for real-time connection, no public URL needed!
 - the bot automatically loads facts from various APIs if it runs low
 - it stores everything in fact_data.json so data persists
 - tracks your trivia scores and personal stats
 - use buttons for trivia questions (much easier than reactions)
 - each category has tons of different facts to discover
+- perfect for local development and testing
 
 the code is kinda messy but it works fine. made it over a weekend so dont judge too hard 😅
 
-## deploying 24/7 for free
+## deploying options
 
-if you want to run this 24/7 without paying anything, here are some good options:
+### for local development (recommended)
+socket mode is perfect for local development! just run `python app.py` and it connects via websocket. no need for public URLs or complex hosting.
 
-### railway.app (recommended)
+### if you want 24/7 hosting
+
+**Note**: Since this now uses Socket Mode, you can run it on any server without needing a public URL!
+
+### railway.app 
 1. push your code to github
 2. go to railway.app and sign up with github
 3. create new project from github repo
-4. add environment variables: `SLACK_BOT_TOKEN` and `SLACK_SIGNING_SECRET`
+4. add environment variables: `SLACK_BOT_TOKEN` and `SLACK_APP_TOKEN`
 5. it should auto-deploy
 
 ### render.com  
 1. push to github
 2. sign up at render.com
 3. create new web service from github
-4. set environment variables `SLACK_BOT_TOKEN` and `SLACK_SIGNING_SECRET`
+4. set environment variables `SLACK_BOT_TOKEN` and `SLACK_APP_TOKEN`
 5. deploy
 
 ### fly.io
 1. install flyctl cli
 2. run `fly launch` in your project folder  
-3. set secrets: `fly secrets set SLACK_BOT_TOKEN=your_token SLACK_SIGNING_SECRET=your_secret`
+3. set secrets: `fly secrets set SLACK_BOT_TOKEN=your_token SLACK_APP_TOKEN=your_app_token`
 4. deploy with `fly deploy`
 
 ### heroku (if you can still get free tier)
 1. install heroku cli
 2. run `heroku create your-app-name`
-3. set config vars: `heroku config:set SLACK_BOT_TOKEN=your_token SLACK_SIGNING_SECRET=your_secret`
+3. set config vars: `heroku config:set SLACK_BOT_TOKEN=your_token SLACK_APP_TOKEN=your_app_token`
 4. push with `git push heroku main`
 
 ### other free options
 - heroku alternatives like dokku
 - google cloud run (free tier)
-- aws lambda (might need some code changes)
+- any VPS or cloud server (socket mode makes it super easy!)
+- even run it on a raspberry pi at home
 
-most of these have free tiers that are perfect for discord bots. just make sure to set the DISCORD_TOKEN environment variable on whichever platform you choose.
+since socket mode doesn't need webhooks or public URLs, you can literally run this anywhere that has internet. much simpler than the old HTTP mode!
 
-pro tip: railway and render are probably the easiest to set up if you're new to this stuff.
+pro tip: for development just run it locally. for production, railway and render are probably the easiest to set up.

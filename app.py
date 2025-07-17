@@ -1,4 +1,5 @@
 from slack_bolt import App
+from slack_bolt.adapter.socket_mode import SocketModeHandler
 import json
 import random
 import asyncio
@@ -18,10 +19,9 @@ last_api_call_time=None
 debug_mode=False
 fact_limit=1000
 
-# Initialize Slack app
+# Initialize Slack app for Socket Mode
 app = App(
-    token=os.environ.get("SLACK_BOT_TOKEN"),
-    signing_secret=os.environ.get("SLACK_SIGNING_SECRET")
+    token=os.environ.get("SLACK_BOT_TOKEN")
 )
 
 facts=[
@@ -817,19 +817,19 @@ def initialize_bot():
 if __name__ == "__main__":
     initialize_bot()
     
-    # Get port from environment variable for Railway
-    port = int(os.environ.get("PORT", 3000))
-    
     # Check if we have the required environment variables
     SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
-    SLACK_SIGNING_SECRET = os.environ.get("SLACK_SIGNING_SECRET")
+    SLACK_APP_TOKEN = os.environ.get("SLACK_APP_TOKEN")
     
-    if SLACK_BOT_TOKEN and SLACK_SIGNING_SECRET:
+    if SLACK_BOT_TOKEN and SLACK_APP_TOKEN:
         try:
-            # Use HTTP mode for Railway deployment
-            app.start(port=port)
+            # Use Socket Mode for better development experience
+            handler = SocketModeHandler(app, SLACK_APP_TOKEN)
+            handler.start()
         except Exception as error:
             print(f"Unexpected error starting bot: {error}")
     else:
-        print("ERROR: SLACK_BOT_TOKEN and SLACK_SIGNING_SECRET environment variables not set!")
+        print("ERROR: SLACK_BOT_TOKEN and SLACK_APP_TOKEN environment variables not set!")
         print("Please set your Slack tokens as environment variables")
+        print("SLACK_BOT_TOKEN: Your bot's OAuth token (starts with xoxb-)")
+        print("SLACK_APP_TOKEN: Your app's socket mode token (starts with xapp-)")
