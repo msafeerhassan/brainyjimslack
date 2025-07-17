@@ -1,0 +1,4 @@
+slack-bolt==1.18.0
+aiohttp==3.8.5
+requests==2.31.0
+psutil==5.9.5
